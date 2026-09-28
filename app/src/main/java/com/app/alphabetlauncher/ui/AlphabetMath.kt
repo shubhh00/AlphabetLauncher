@@ -1,5 +1,6 @@
-package com.app.alphabetlauncher
+package com.app.alphabetlauncher.ui
 
+import com.app.alphabetlauncher.data.LaunchableApp
 import kotlin.math.exp
 
 internal fun letterAt(y: Float, height: Float): Char {
@@ -18,3 +19,8 @@ internal fun appsForLetter(apps: List<LaunchableApp>, letter: Char): List<Launch
 
 internal fun startsWithLetter(name: String, letter: Char): Boolean =
     name.firstOrNull()?.uppercaseChar() == letter
+
+internal fun lettersWithApps(names: Iterable<String>): Set<Char> =
+    names.mapNotNull { name ->
+        name.firstOrNull()?.uppercaseChar()?.takeIf { it in 'A'..'Z' }
+    }.toSet()
