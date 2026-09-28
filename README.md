@@ -92,3 +92,7 @@ Other starter dependencies (`ui-tooling`, `ui-tooling-preview`, Compose UI test,
 ## Verification
 
 Run `./gradlew testDebugUnitTest assembleDebug` after Gradle sync. On a phone, check the full A-Z drag, an empty letter, release, haptics, both system themes, app launching, favourite persistence after a restart, both default-launcher choices, live changes after installing or removing another app, and swipe-up search with the keyboard visible. Confirm the bend and letter bubble appear on the first touch from Home, including after returning from Browse. Scrolling favourites and dragging the alphabet should not open search. Smoothness still needs a measured frame-rate check on a device.
+
+## AI usage
+
+I built and tested the app. OpenAI Codex helped with boilerplate and refining the alphabet animation math and interaction logic for a smoother experience.
