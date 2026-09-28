@@ -7,15 +7,7 @@
     <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack-Compose-4285F4?logo=jetpackcompose&amp;logoColor=white" />
     <img alt="Android 8.0 and later" src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&amp;logoColor=white" />
   </p>
-  <p>
-    <img alt="28 Canvas rows" src="https://img.shields.io/badge/Canvas%20rows-28-315E81" />
-    <img alt="One pass app grouping" src="https://img.shields.io/badge/app%20grouping-1%20pass-315E81" />
-    <img alt="Zero package queries on the gesture path" src="https://img.shields.io/badge/gesture%20path%20package%20queries-0-315E81" />
-    <img alt="Minimum SDK 26" src="https://img.shields.io/badge/min%20SDK-26-315E81" />
-  </p>
 </div>
-
-The selected letter stays open after release so an app can be tapped. Back or **Favourites** returns home; long-pressing an app updates favourites across restarts.
 
 ## Engineering at a glance
 
@@ -34,14 +26,30 @@ These are implementation facts, not benchmark results. Frame rate, frame time, a
 
 ## Screenshots
 
-| Home | Alphabet browse | Swipe-up search |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/home.png" alt="Home screen with clock, favourites, and alphabet bar" width="220" /> | <img src="docs/screenshots/browse.png" alt="Browse screen with the G selection and matching apps" width="220" /> | <img src="docs/screenshots/search.png" alt="Search screen filtering apps by name" width="220" /> |
-| Clock and favourites | Finger-tracking A-Z bar and app list | In-memory app search |
+<table align="center">
+  <tr>
+    <th align="center">Home</th>
+    <th align="center">Alphabet browse</th>
+    <th align="center">Swipe-up search</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="https://github.com/user-attachments/assets/d91858aa-e48a-4365-8ad5-e7addde10b3b" alt="Home screen with clock, favourites, and alphabet bar" width="220" /></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/655a9c6d-7d5b-4f62-9759-418e9d0bb89f" alt="Browse screen with the G selection and matching apps" width="220" /></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/386f7178-316a-4fe8-a3bd-ff70488b24b2" alt="Search screen filtering apps by name" width="220" /></td>
+  </tr>
+  <tr>
+    <td align="center">Clock and favourites</td>
+    <td align="center">Finger-tracking A–Z bar and app list</td>
+    <td align="center">In-memory app search</td>
+  </tr>
+</table>
 
 ## Demo video
 
-**Video pending.** Add the recorded launcher walkthrough here after capturing it on a phone. Show the alphabet drag and spring return, app launch, swipe-up search, favourite toggle, and live install/uninstall update.
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/5c495181-f7c7-41f0-8405-508bc084b4fa" width="320" controls></video>
+  <p><sub>See the alphabet respond to touch, browse apps by letter, and open search with a swipe.</sub></p>
+</div>
 
 ## Run
 
@@ -57,17 +65,11 @@ The app queries activities with `ACTION_MAIN` and `CATEGORY_LAUNCHER`. The manif
 
 ## Structure and bonuses
 
-`MainActivity.kt` hosts the app and handles launching. The `data` package loads installed apps, watches package changes, and saves favourites as component names in SharedPreferences. The `ui` package composes the launcher screen and its state; `ui.alphabet` owns pointer handling, Canvas drawing, and pure selection and falloff calculations; `ui.search` owns the swipe gesture and search view; `ui.components` holds the clock and app list; `ui.theme` holds system-aware colours and typography. The first seven installed apps become the initial favourites only once; later changes survive restarts.
+`MainActivity.kt` hosts the launcher. `data` handles app discovery, package-change updates, and persisted favourites; `ui.alphabet` contains the touch and Canvas logic; `ui.search` handles swipe-up search; `ui.components` and `ui.theme` contain shared views and system-aware styling.
 
-The bar gives a light haptic tick when the selected letter changes. Letters with no installed apps are dimmed but remain selectable so the empty state can be demonstrated. The launcher follows the system light or dark setting with a subtle gradient background; system bar icons follow the same setting.
+Bonuses include haptic ticks, dimmed empty letters, light and dark themes, long-press favourites, live app-list updates, and keyboard-focused search. The first launch offers Android's default-launcher picker, with a later option on Home. Selecting a letter keeps its app list open for tapping; Back or **Favourites** returns Home.
 
-The home and letter views use the same restrained type hierarchy and lightly outlined app rows. The clock refreshes at minute boundaries because seconds are not displayed. These visual changes leave the Canvas gesture and cached app list unchanged.
-
-Swiping up on unused Home space opens search and focuses the text field. The swipe observer ignores drags consumed by the favourites list and excludes the alphabet bar. A visible search hint is also tappable. Search results reuse the same app rows, including tap-to-launch and long-press favourites.
-
-The app also registers as a Home app. On first launch, it asks whether to open Android's default-launcher picker. Choosing "Not now" keeps the current launcher and stops the first-launch prompt; the home screen still offers a "Set as default launcher" action. The choice is made by the Android system, not by the app itself.
-
-Live updates use a context-registered receiver for package add, remove, replace, and component-change broadcasts. A short debounce coalesces bursts of install events. When the launcher returns from the background, it reloads to catch changes that occurred while the receiver was stopped. Existing favourite choices remain in state during a refresh.
+The UI uses a subtle gradient, a clear type hierarchy, and lightly outlined app cards to give the launcher a clean look in both light and dark themes. The clock, favourites, browse view, and search screen share the same visual style.
 
 ## Libraries
 
@@ -90,7 +92,3 @@ Other starter dependencies (`ui-tooling`, `ui-tooling-preview`, Compose UI test,
 ## Verification
 
 Run `./gradlew testDebugUnitTest assembleDebug` after Gradle sync. On a phone, check the full A-Z drag, an empty letter, release, haptics, both system themes, app launching, favourite persistence after a restart, both default-launcher choices, live changes after installing or removing another app, and swipe-up search with the keyboard visible. Confirm the bend and letter bubble appear on the first touch from Home, including after returning from Browse. Scrolling favourites and dragging the alphabet should not open search. Smoothness still needs a measured frame-rate check on a device.
-
-## Notes
-
-OpenAI Codex provided substantial assistance with code drafting, debugging, refactoring, and documentation. The project owner set up the project, directed features and design, and tested the app on a phone; final code review and explanation remain the owner's responsibility.
