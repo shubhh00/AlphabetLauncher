@@ -1,4 +1,4 @@
-package com.app.alphabetlauncher.ui
+package com.app.alphabetlauncher.ui.alphabet
 
 import android.graphics.Paint
 import androidx.compose.animation.core.animateFloatAsState
@@ -25,8 +25,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
 
+internal val AlphabetBarWidth = 132.dp
+
 @Composable
-fun AlphabetBar(
+internal fun AlphabetBar(
     modifier: Modifier = Modifier,
     availableLetters: Set<Char>,
     onLetterChanged: (Char) -> Unit
@@ -56,7 +58,7 @@ fun AlphabetBar(
     Canvas(
         modifier
             .fillMaxHeight(0.72f)
-            .width(132.dp)
+            .width(AlphabetBarWidth)
             .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)

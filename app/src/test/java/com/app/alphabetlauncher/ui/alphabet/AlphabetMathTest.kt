@@ -1,9 +1,5 @@
-package com.app.alphabetlauncher
+package com.app.alphabetlauncher.ui.alphabet
 
-import com.app.alphabetlauncher.ui.bendOffset
-import com.app.alphabetlauncher.ui.letterAt
-import com.app.alphabetlauncher.ui.lettersWithApps
-import com.app.alphabetlauncher.ui.startsWithLetter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -27,15 +23,11 @@ class AlphabetMathTest {
     }
 
     @Test
-    fun matchingIgnoresCaseAndHandlesEmptyNames() {
-        assertTrue(startsWithLetter("gmail", 'G'))
-        assertTrue(startsWithLetter("GPay", 'G'))
-        assertTrue(!startsWithLetter("", 'G'))
-        assertTrue(!startsWithLetter("Maps", 'G'))
-    }
-
-    @Test
-    fun onlyLettersWithAppsAreAvailable() {
-        assertEquals(setOf('A', 'G'), lettersWithApps(listOf("App", "gmail", "GPay", "", "#Tools")))
+    fun groupingPreservesAppOrderAndSkipsNamesWithoutLetters() {
+        val grouped = groupByInitial(listOf("App", "gmail", "GPay", "", "#Tools", "Notes")) { it }
+        assertEquals(listOf("App"), grouped['A'])
+        assertEquals(listOf("gmail", "GPay"), grouped['G'])
+        assertEquals(listOf("Notes"), grouped['N'])
+        assertEquals(setOf('A', 'G', 'N'), grouped.keys)
     }
 }

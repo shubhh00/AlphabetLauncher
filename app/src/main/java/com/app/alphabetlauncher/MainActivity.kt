@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import com.app.alphabetlauncher.data.AppCatalogObserver
 import com.app.alphabetlauncher.data.LaunchableApp
 import com.app.alphabetlauncher.data.LauncherPreferences
 import com.app.alphabetlauncher.data.loadApps
@@ -19,11 +20,16 @@ import com.app.alphabetlauncher.ui.LauncherScreen
 import com.app.alphabetlauncher.ui.LauncherUiState
 import com.app.alphabetlauncher.ui.theme.AlphabetLauncherTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : ComponentActivity() {
     private lateinit var preferences: LauncherPreferences
+    private lateinit var appCatalogObserver: AppCatalogObserver
+    private var appRefreshJob: Job? = null
     private var uiState by mutableStateOf(LauncherUiState())
     private val homeRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -34,18 +40,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         preferences = LauncherPreferences(this)
+        appCatalogObserver = AppCatalogObserver(this) { refreshApps(debounceMillis = 250) }
         val isDefault = isDefaultLauncher(this)
         uiState = uiState.copy(
             isDefaultLauncher = isDefault,
             showHomePrompt = !isDefault && !preferences.hasAnsweredHomePrompt
         )
-        lifecycleScope.launch {
-            val (apps, favourites) = withContext(Dispatchers.IO) {
-                val loaded = loadApps(packageManager)
-                loaded to preferences.favourites(loaded)
-            }
-            uiState = uiState.copy(apps = apps, favouriteComponents = favourites, loading = false)
-        }
         setContent {
             AlphabetLauncherTheme {
                 LauncherScreen(
@@ -59,6 +59,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        appCatalogObserver.start()
+        refreshApps()
+    }
+
     override fun onResume() {
         super.onResume()
         val isDefault = isDefaultLauncher(this)
@@ -66,6 +72,26 @@ class MainActivity : ComponentActivity() {
             isDefaultLauncher = isDefault,
             showHomePrompt = uiState.showHomePrompt && !isDefault
         )
+    }
+
+    override fun onStop() {
+        appCatalogObserver.stop()
+        appRefreshJob?.cancel()
+        super.onStop()
+    }
+
+    private fun refreshApps(debounceMillis: Long = 0) {
+        appRefreshJob?.cancel()
+        appRefreshJob = lifecycleScope.launch {
+            if (debounceMillis > 0) delay(debounceMillis.milliseconds)
+            val apps = withContext(Dispatchers.IO) { loadApps(packageManager) }
+            val favourites = if (uiState.loading) {
+                withContext(Dispatchers.IO) { preferences.favourites(apps) }
+            } else {
+                uiState.favouriteComponents
+            }
+            uiState = uiState.copy(apps = apps, favouriteComponents = favourites, loading = false)
+        }
     }
 
     private fun toggleFavourite(app: LaunchableApp) {
